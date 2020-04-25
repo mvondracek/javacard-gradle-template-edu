@@ -4,6 +4,7 @@ import applet.MainApplet;
 import cardTools.CardManager;
 import cardTools.RunConfig;
 import cardTools.Util;
+import javacard.framework.Applet;
 
 import javax.smartcardio.CardException;
 import javax.smartcardio.CommandAPDU;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 public class BaseTest {
     private static String APPLET_AID = "0102030405060708090102";
     private static byte APPLET_AID_BYTE[] = Util.hexStringToByteArray(APPLET_AID);
+    private static Class DEFAULT_APPLET_CLASS = MainApplet.class;
 
     protected RunConfig.CARD_TYPE cardType = RunConfig.CARD_TYPE.JCARDSIMLOCAL;
 
@@ -36,21 +38,26 @@ public class BaseTest {
      * @throws Exception
      */
     public CardManager connect() throws Exception {
-        return connect(null);
+        return connect((byte[]) null);
     }
-
     public CardManager connect(byte[] installData) throws Exception {
+        return connect(installData, DEFAULT_APPLET_CLASS);
+    }
+    public CardManager connect(Class appletToSimulate) throws Exception {
+        return connect(null, appletToSimulate);
+    }
+    public CardManager connect(byte[] installData, Class appletToSimulate) throws Exception {
         if (simulateStateful && statefulCard != null){
             return statefulCard;
         } else if (simulateStateful){
-            statefulCard = connectRaw(installData);
+            statefulCard = connectRaw(installData, appletToSimulate);
             return statefulCard;
         }
 
-        return connectRaw(installData);
+        return connectRaw(installData, appletToSimulate);
     }
 
-    public CardManager connectRaw(byte[] installData) throws Exception {
+    public CardManager connectRaw(byte[] installData, Class appletToSimulate) throws Exception {
         final CardManager cardMngr = new CardManager(true, APPLET_AID_BYTE);
         final RunConfig runCfg = RunConfig.getDefaultConfig();
         System.setProperty("com.licel.jcardsim.object_deletion_supported", "1");
@@ -61,7 +68,7 @@ public class BaseTest {
             runCfg.setTestCardType(RunConfig.CARD_TYPE.PHYSICAL);
         } else {
             // Running in the simulator
-            runCfg.setAppletToSimulate(MainApplet.class)
+            runCfg.setAppletToSimulate(appletToSimulate)
                     .setTestCardType(RunConfig.CARD_TYPE.JCARDSIMLOCAL)
                     .setbReuploadApplet(true)
                     .setInstallData(installData);
