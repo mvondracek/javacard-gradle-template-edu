@@ -67,7 +67,7 @@ public class BaseTest {
         // System.setProperty("com.licel.jcardsim.randomdata.seed", "02");
 
         // Set to seed RandomData from the SecureRandom
-        // System.setProperty("com.licel.jcardsim.randomdata.secure", "1");
+        System.setProperty("com.licel.jcardsim.randomdata.secure", "1");
 
         // Running on physical card
         if (cardType == RunConfig.CARD_TYPE.PHYSICAL) {
